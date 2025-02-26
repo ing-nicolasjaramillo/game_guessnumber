@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Juego adivinanza</title>
+
+    <style>
+      html {
+        font-family: sans-serif;
+      }
+
+      main {
+        width: 50%;
+        max-width: 800px;
+        min-width: 480px;
+        margin: 0 auto;
+        background-color: rgb(255, 255, 255);
+      }
+      
+      .form input[type="number"] {
+        width: 200px;
+        background-color: rgba(243, 243, 243, 0.333);
+      }
+
+      .form{
+        margin-top: 10px;
+      }
+
+      .lastResult {
+        color: white;
+        padding: 3px;
+      }
+
+      footer{
+        text-align: center;
+        font-family: fantasy,Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        font-size: smaller;
+        background-color: #05f;
+        height: 40px;
+        position: relative;
+      }
+
+      header{
+        background-color: #05f;
+        width: 250 px;
+        height: 40px;
+      }
+
+      body{
+        margin: 0;
+      }
+
+      .footerContainer{
+        display: flex;
+        justify-content: center; /* Centra horizontalmente */
+        align-items: center; /* Centra verticalmente */
+        height: 60px; /* Ajusta según tu necesidad */
+        background-color: #05f; /* Opcional, para darle estilo */
+        color: black; /* Opcional, para mejor visibilidad */
+      }
+
+      img{
+        padding: 15px 5px 5px 5px;
+      }
+
+      .btnDiv{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-top: 15px;
+      }
+
+      .hearts-container {
+            display: flex;
+            gap: 1px;
+            justify-content: right;
+            align-items: end;
+            /**margin-right: 39.5%;*/
+        }
+
+        .heart {
+            width:20px; /* Ajusta el tamaño según tu necesidad */
+            height: 20px;
+        }
+
+    </style>
+
+  </head>
+
+    <body>
+
+      <header></header>
+      <main>
+        <h1>Number guessing game</h1>
+        <p>We have selected a random number between 1 and 100. See if you can guess it in 10 turns or fewer. We'll tell you if your guess was too high or too low.</p>
+
+        <details>
+          <summary>
+              How to play?
+          </summary>
+          <ul>
+            <li>Numbers between 1-100</li>
+            <li>Adivinate on 10 turns</li>
+          </ul>
+        </details>
+
+        <section class="form">
+          <label for="guessField">Enter a guess: </label>
+          <input type="number" min="1" max="100" required id="guessField" class="guessField" placeholder="Ingrese el número">
+          <input type="submit" value="Submit guess" class="guessSubmit">
+        </section>
+
+        <div class="hearts-container" id="heartsContainer"></div>
+      
+        <div class="resultParas">
+          <p class="guesses"></p>
+          <p class="lastResult"></p>
+          <p class="lowOrHi"></p>
+        </div>
+
+        <div class="btnDiv">
+          <button class="resetBtn" >Reiniciar</button>
+        </div>
+
+        <script>
+          // Your JavaScript goes here
+            let randomNumber = Math.floor(Math.random() * 100) + 1;
+
+            console.log(randomNumber);
+
+            // sirven cada una para almacenar una referencia a los párrafos de resultados en nuestro HTML, 
+            // y se usarán para insertar valores en los párrafos más adelante en el código
+            const guesses = document.querySelector(".guesses");
+            const lastResult = document.querySelector(".lastResult");
+            const lowOrHi = document.querySelector(".lowOrHi");
+
+            // almacenan referencias a la entrada de texto y al botón "Enviar" del formulario, y 
+            // se utilizan para controlar las respuestas del jugador más adelante.
+            const guessSubmit = document.querySelector(".guessSubmit");
+            const guessField = document.querySelector(".guessField");
+            
+            //Botón reiniciar
+            const resetButton=document.querySelector(".resetBtn");
+            let guessCount = 1;
+
+            
+            const fullHeart="../resources/life-icon.png"; 
+            const emptyHeart="../resources/lostLife-icon.png"; 
+            // Contenedor donde se mostrarán los corazones
+            const heartsContainer = document.getElementById("heartsContainer");
+            // Inicializar los 10 corazones llenos
+            
+            let heartsArray = new Array(10).fill(fullHeart);
+            updateHearts();
+
+            function updateHearts() {
+    
+            heartsContainer.innerHTML = ""; // Limpiar el contenedor
+            heartsArray.forEach((heartSrc) => {
+                const img = document.createElement("img");
+                img.src = heartSrc;
+                img.classList.add("heart");
+                heartsContainer.appendChild(img);
+            });
+        }
+             
+
+            /**
+             * Función que verifica que el usuario acierte el resultado generado aleatoriamente
+             */
+            function checkGuess() {
+                
+                //Número ingresado por el usuario
+                let userGuess = Number(guessField.value);
+
+                if (guessCount === 1) {
+                    guesses.textContent = "Last intents: ";
+                }
+                guesses.textContent += userGuess + " ";
+
+                if (userGuess === randomNumber) {
+                    lastResult.textContent = "¡Felicidades! ¡Lo adivinaste!";
+                    lastResult.style.backgroundColor = "green";
+                    lowOrHi.textContent = "";
+                } else if (guessCount === 10) { //Limite de intentos alcanzado
+                    lastResult.textContent = "¡¡¡Fin del juego!!!";
+                    lowOrHi.textContent="";
+                    setGameOver();
+                } else {
+                    lastResult.textContent = "¡Incorrecto!";
+                    lastResult.style.backgroundColor = "red";
+                    if (userGuess < randomNumber) {
+                    lowOrHi.textContent = "¡El número es muy bajo!";
+                    } else if (userGuess > randomNumber) {
+                    lowOrHi.textContent = "¡El número es muy grande!";
+                    }
+                }
+
+                heartsArray[10 - guessCount ] = emptyHeart; // Cambia un corazón a vacío
+                updateHearts();
+
+                guessCount++;
+                guessField.value = "";
+  
+                guessField.focus();
+            } 
+
+            //Evento al botón "submit guess" y reiniciar
+            guessSubmit.addEventListener("click", checkGuess);
+            resetButton.addEventListener("click",resetGame);
+
+            /**
+             * Función para terminar el juego de un usuario
+             **/
+            function setGameOver(){
+              guessField.disabled = true;
+              guessSubmit.disabled = true;                
+              resetButton.textContent = "GAME OVER";
+              
+            }
+
+            /**
+             * Función para reiniciar los valores a su estado inicial y repetier el juego
+             **/
+            function resetGame(){
+                
+              resetButton.textContent = "Reiniciar";
+                guessCount = 1;
+                const resetParas = document.querySelectorAll(".resultParas p");
+                for (let i = 0; i < resetParas.length; i++) {
+                  resetParas[i].textContent = "";
+                }
+
+                guessField.disabled = false;
+                guessSubmit.disabled = false;
+                guessField.value = "";
+                guessField.focus();
+
+                lastResult.style.backgroundColor = "white";
+
+                heartsArray = new Array(10).fill(fullHeart);
+                updateHearts();
+                
+                randomNumber = Math.floor(Math.random() * 100) + 1;
+            }
+        </script>
+          
+          <img loading="lazy" style="width: 100%; aspect-ratio: 1584/396;" src="../resources/fondoLinkedIn.png" alt="fondo de marca">
+
+      </main>
+
+      <footer>
+        <div class="footerContainer">
+          Juego creado por Nicolás
+        </div>
+      </footer>
+    </body>
+</html>
